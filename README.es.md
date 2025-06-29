@@ -288,7 +288,3 @@ docker restart <id_contenedor>
 ## Licencia
 Distribuido bajo la Licencia MIT. Consulta el archivo `LICENSE` para más información.
 
-## Contacto
-Tu Nombre - [@tu_twitter](https://twitter.com/tu_twitter) - email@ejemplo.com
-
-Enlace del Proyecto: [https://github.com/tuusuario/dashboard-metricas-gpt](https://github.com/tuusuario/dashboard-metricas-gpt)
