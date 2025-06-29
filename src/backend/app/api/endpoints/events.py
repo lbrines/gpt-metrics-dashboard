@@ -10,11 +10,12 @@ from uuid import UUID
 from ...database import obtener_db
 from ...models.metricas import Evento, Sesion
 from ...schemas.metricas import EventoCreate, Evento as EventoSchema
+from ...dependencies import verificar_token_gpt
 
 router = APIRouter()
 
 @router.post("/events", response_model=EventoSchema, status_code=status.HTTP_201_CREATED)
-def crear_evento(evento: EventoCreate, db: Session = Depends(obtener_db)):
+def crear_evento(evento: EventoCreate, db: Session = Depends(obtener_db), token: str = Depends(verificar_token_gpt)):
     """
     Registra un nuevo evento durante una sesión de GPT.
     """
@@ -37,7 +38,8 @@ def crear_evento(evento: EventoCreate, db: Session = Depends(obtener_db)):
 def obtener_eventos(
     sesion_id: Optional[UUID] = None, 
     tipo: Optional[str] = None,
-    db: Session = Depends(obtener_db)
+    db: Session = Depends(obtener_db),
+    token: str = Depends(verificar_token_gpt)
 ):
     """
     Obtiene la lista de eventos con opciones de filtrado por sesión y tipo.
@@ -56,7 +58,7 @@ def obtener_eventos(
     return eventos
 
 @router.get("/events/{evento_id}", response_model=EventoSchema)
-def obtener_evento(evento_id: UUID, db: Session = Depends(obtener_db)):
+def obtener_evento(evento_id: UUID, db: Session = Depends(obtener_db), token: str = Depends(verificar_token_gpt)):
     """
     Obtiene un evento específico por su ID.
     """

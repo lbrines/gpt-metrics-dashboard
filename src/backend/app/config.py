@@ -16,6 +16,9 @@ class Configuracion(BaseSettings):
     APP_NAME: str = "Dashboard de Métricas GPT"
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     
+    # Configuración de seguridad
+    GPT_API_TOKEN: str = os.getenv("GPT_API_TOKEN", "")
+    
     # Configuración de CORS
     @property
     def CORS_ORIGINS(self) -> List[str]:

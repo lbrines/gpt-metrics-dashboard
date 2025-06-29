@@ -2,7 +2,7 @@
 # Autor: Equipo DevOps
 # Propósito: Punto de entrada principal de la aplicación FastAPI
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import json
@@ -18,6 +18,7 @@ from .database import Base, motor_db, obtener_db
 from .api.endpoints import health, sessions, events, metrics
 from .models.metricas import GPT, Sesion
 from .schemas.metricas import GPT as GPTSchema, Sesion as SesionSchema
+from .dependencies import verificar_token_gpt, validar_configuracion_token
 
 # Crear tablas en la base de datos (si no existen)
 Base.metadata.create_all(bind=motor_db)
@@ -30,6 +31,17 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+@app.on_event("startup")
+async def validar_configuracion_inicio():
+    """Valida la configuración de seguridad al iniciar la aplicación."""
+    if not validar_configuracion_token():
+        logging.warning(
+            "⚠️  GPT_API_TOKEN no está configurado correctamente. "
+            "Los endpoints protegidos requerirán un token válido."
+        )
+    else:
+        logging.info("✅ Configuración de seguridad validada correctamente")
 
 # Configurar CORS para permitir peticiones desde el frontend
 app.add_middleware(
@@ -103,7 +115,7 @@ def obtener_gpts_config():
         return []
 
 @app.post("/sync-gpts", response_model=GPTSyncResult, tags=["GPTs"])
-def sync_gpts_from_config():
+def sync_gpts_from_config(token: str = Depends(verificar_token_gpt)):
     """Sincroniza los GPTs desde el archivo de configuración hacia la base de datos."""
     try:
         # Ruta al archivo JSON relativa a la ubicación del script
@@ -158,7 +170,7 @@ def sync_gpts_from_config():
         return GPTSyncResult(created=[], updated=[], skipped=[])
 
 @app.get("/gpts-db", response_model=List[GPTSchema], tags=["GPTs"])
-def obtener_gpts_db():
+def obtener_gpts_db(token: str = Depends(verificar_token_gpt)):
     """Obtiene los GPTs desde la base de datos."""
     try:
         db: Session = next(obtener_db())
@@ -170,7 +182,7 @@ def obtener_gpts_db():
         return []
 
 @app.post("/sessions-by-code", response_model=SesionSchema, tags=["Sesiones"])
-def crear_sesion_por_codigo(sesion: SesionCreateByCode):
+def crear_sesion_por_codigo(sesion: SesionCreateByCode, token: str = Depends(verificar_token_gpt)):
     """Crea una nueva sesión usando el código del GPT en lugar del UUID."""
     try:
         db: Session = next(obtener_db())

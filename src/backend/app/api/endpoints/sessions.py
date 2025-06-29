@@ -11,11 +11,12 @@ from datetime import datetime
 from ...database import obtener_db
 from ...models.metricas import Sesion, GPT
 from ...schemas.metricas import SesionCreate, Sesion as SesionSchema, SesionUpdate
+from ...dependencies import verificar_token_gpt
 
 router = APIRouter()
 
 @router.post("/sessions", response_model=SesionSchema, status_code=status.HTTP_201_CREATED)
-def crear_sesion(sesion: SesionCreate, db: Session = Depends(obtener_db)):
+def crear_sesion(sesion: SesionCreate, db: Session = Depends(obtener_db), token: str = Depends(verificar_token_gpt)):
     """
     Crea una nueva sesión para un GPT específico.
     """
@@ -39,7 +40,8 @@ def obtener_sesiones(
     gpt_id: Optional[UUID] = None, 
     fecha_inicio: Optional[datetime] = None, 
     fecha_fin: Optional[datetime] = None,
-    db: Session = Depends(obtener_db)
+    db: Session = Depends(obtener_db),
+    token: str = Depends(verificar_token_gpt)
 ):
     """
     Obtiene la lista de sesiones con opciones de filtrado por GPT y rango de fechas.
@@ -61,7 +63,7 @@ def obtener_sesiones(
     return sesiones
 
 @router.get("/sessions/{sesion_id}", response_model=SesionSchema)
-def obtener_sesion(sesion_id: UUID, db: Session = Depends(obtener_db)):
+def obtener_sesion(sesion_id: UUID, db: Session = Depends(obtener_db), token: str = Depends(verificar_token_gpt)):
     """
     Obtiene una sesión específica por su ID.
     """
@@ -74,7 +76,7 @@ def obtener_sesion(sesion_id: UUID, db: Session = Depends(obtener_db)):
     return sesion
 
 @router.put("/sessions/{sesion_id}", response_model=SesionSchema)
-def actualizar_sesion(sesion_id: UUID, sesion_actualizada: SesionUpdate, db: Session = Depends(obtener_db)):
+def actualizar_sesion(sesion_id: UUID, sesion_actualizada: SesionUpdate, db: Session = Depends(obtener_db), token: str = Depends(verificar_token_gpt)):
     """
     Actualiza una sesión existente, especialmente para marcar su finalización.
     """

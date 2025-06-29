@@ -14,6 +14,7 @@ from ...schemas.metricas import (
     MetricasMensajesPorSesion, MetricasTiempoRespuesta,
     MetricasDuracionSesion, MetricasRecuentoSesiones
 )
+from ...dependencies import verificar_token_gpt
 
 router = APIRouter()
 
@@ -22,7 +23,8 @@ def obtener_mensajes_por_sesion(
     gpt_id: Optional[UUID] = None,
     fecha_inicio: Optional[datetime] = Query(None),
     fecha_fin: Optional[datetime] = Query(None),
-    db: Session = Depends(obtener_db)
+    db: Session = Depends(obtener_db),
+    token: str = Depends(verificar_token_gpt)
 ):
     """
     Obtiene la métrica de mensajes por sesión para uno o todos los GPTs.
@@ -34,7 +36,8 @@ def obtener_tiempo_respuesta(
     gpt_id: Optional[UUID] = None,
     fecha_inicio: Optional[datetime] = Query(None),
     fecha_fin: Optional[datetime] = Query(None),
-    db: Session = Depends(obtener_db)
+    db: Session = Depends(obtener_db),
+    token: str = Depends(verificar_token_gpt)
 ):
     """
     Obtiene la métrica de tiempo promedio de respuesta para uno o todos los GPTs.
@@ -46,7 +49,8 @@ def obtener_duracion_sesiones(
     gpt_id: Optional[UUID] = None,
     fecha_inicio: Optional[datetime] = Query(None),
     fecha_fin: Optional[datetime] = Query(None),
-    db: Session = Depends(obtener_db)
+    db: Session = Depends(obtener_db),
+    token: str = Depends(verificar_token_gpt)
 ):
     """
     Obtiene la distribución de duración de sesiones para uno o todos los GPTs.
@@ -59,7 +63,8 @@ def obtener_recuento_sesiones(
     fecha_inicio: Optional[datetime] = Query(None),
     fecha_fin: Optional[datetime] = Query(None),
     dias: int = Query(30, ge=1, le=365),
-    db: Session = Depends(obtener_db)
+    db: Session = Depends(obtener_db),
+    token: str = Depends(verificar_token_gpt)
 ):
     """
     Obtiene el recuento diario de sesiones para uno o todos los GPTs.
