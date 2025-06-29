@@ -185,8 +185,22 @@ else
     grep -q "^DOMAIN=" "$ENV_FILE" || echo "DOMAIN=${DOMAIN}" >> "$ENV_FILE"
     grep -q "^SESSION_SECRET=" "$ENV_FILE" || echo "SESSION_SECRET=$(openssl rand -hex 32)" >> "$ENV_FILE"
     
-    # Source the updated .env file
-    export $(grep -v '^#' "$ENV_FILE" | xargs)
+    # Source the updated .env file, handling comments and special characters properly
+    set -a
+    # Load only valid variable assignments, ignoring comments and empty lines
+    while IFS='=' read -r key value; do
+        # Remove comments and trim whitespace
+        key=${key%%#*}
+        key=$(echo "$key" | xargs)
+        value=${value%%#*}
+        value=$(echo "$value" | xargs)
+        
+        # Only export if key is not empty
+        if [ -n "$key" ]; then
+            export "$key=$value"
+        fi
+    done < <(grep -v '^[[:space:]]*$' "$ENV_FILE" | grep -v '^#')
+    set +a
 fi
 
 # Create data directories
