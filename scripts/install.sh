@@ -185,21 +185,22 @@ else
     grep -q "^DOMAIN=" "$ENV_FILE" || echo "DOMAIN=${DOMAIN}" >> "$ENV_FILE"
     grep -q "^SESSION_SECRET=" "$ENV_FILE" || echo "SESSION_SECRET=$(openssl rand -hex 32)" >> "$ENV_FILE"
     
-    # Source the updated .env file, handling comments and special characters properly
+    # Cargar el archivo .env, manejando correctamente comentarios y caracteres especiales
     set -a
-    # Load only valid variable assignments, ignoring comments and empty lines
-    while IFS='=' read -r key value; do
-        # Remove comments and trim whitespace
-        key=${key%%#*}
-        key=$(echo "$key" | xargs)
-        value=${value%%#*}
-        value=$(echo "$value" | xargs)
+    # Cargar solo líneas que parezcan asignaciones de variables
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Eliminar comentarios (todo lo que vaya después de #)
+        line_clean=${line%%#*}
+        # Eliminar espacios en blanco al inicio y final
+        line_clean=$(echo "$line_clean" | xargs)
         
-        # Only export if key is not empty
-        if [ -n "$key" ]; then
-            export "$key=$value"
+        # Si la línea resultante es una asignación de variable (formato KEY=VALUE)
+        if [[ "$line_clean" =~ ^[[:alnum:]_]+= ]]; then
+            # Exportar la variable
+            export "$line_clean" 2>/dev/null || \
+                log_message "WARNING" "No se pudo exportar: $line_clean"
         fi
-    done < <(grep -v '^[[:space:]]*$' "$ENV_FILE" | grep -v '^#')
+    done < "$ENV_FILE"
     set +a
 fi
 
