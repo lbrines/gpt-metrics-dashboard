@@ -278,6 +278,109 @@ docker logs <id_contenedor>
 docker restart <id_contenedor>
 ```
 
+## Configuración de GPTs con OpenAI Actions
+
+# Guía Genérica para Configurar un GPT con Actions
+
+Esta guía te servirá como referencia o como **prompt** que le puedes dar a un LLM para que genere automáticamente la documentación de configuración de un GPT que use OpenAI Actions (acciones HTTP).
+
+---
+
+## 1. Objetivo
+
+Documentar paso a paso cómo:
+
+1. Configurar la **autenticación** (API Key, Bearer, OAuth).
+2. Definir el **schema OpenAPI** de los endpoints.
+3. Registrar las **acciones** (Available Actions) que el GPT podrá invocar.
+4. Añadir la **privacy policy**.
+5. Probar, publicar y compartir el GPT.
+
+---
+
+## 2. Estructura del Prompt para el LLM
+
+```text
+Eres un experto en integración de GPTs con OpenAI Actions. Necesito que generes la documentación completa, en **Markdown**, para un GPT que:
+
+1. Se autentica mediante **[API Key | Bearer | OAuth2]**.
+2. Mantiene un esquema OpenAPI versión **3.1.0** que incluye estos endpoints:
+   - **POST /sessions**: crea una nueva sesión.
+   - **POST /events**: registra un evento (user_message, response, error).
+   - **PUT /sessions/{session_id}**: actualiza la sesión (ended_at, duration_ms).
+3. Explica cómo rellenar el campo **Schema** en la UI de "Add actions".
+4. Muestra cómo verificar que las **Available Actions** se detectan correctamente.
+5. Indica dónde y cómo pegar la **Privacy Policy**.
+6. Describe los pasos de **prueba** (Test button) y **publicación** (Publish/Update).
+7. Añade ejemplos de llamadas de prueba con `curl` y cómo ver los resultados en un dashboard React.
+8. Da consejos de buenas prácticas: nombres de `operationId`, manejo de errores, seguridad de tokens, versión del OpenAPI.
+
+Mantén la guía lo más **genérica** posible para que sirva a cualquier proyecto con arquitectura similar (FastAPI, Node.js, Docker, etc.).  
+Devuélvelo en un **solo** documento Markdown, con títulos, secciones, ejemplos de código y tips.
+```
+
+---
+
+## 3. Ejemplo de Salida Esperada
+
+Al pasar el prompt anterior, el LLM debería generar algo como esto en Markdown:
+
+```markdown
+# Configuración de GPT con OpenAI Actions
+
+## 1. Autenticación
+- Tipo: API Key (Bearer)
+- Header: `Authorization: Bearer <YOUR_TOKEN>`
+
+## 2. OpenAPI Schema
+```yaml
+openapi: 3.1.0
+info: …
+paths: …
+components: …
+```
+
+## 3. Available Actions
+
+* `createSession` → POST `/sessions`
+* `createEvent`   → POST `/events`
+* `updateSession` → PUT `/sessions/{session_id}`
+
+## 4. Privacy Policy
+
+* URL: `https://miapp.example.com/privacy`
+
+## 5. Pruebas
+
+```bash
+curl -X POST https://api.example.com/sessions \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"user_id":"u1"}'
+```
+
+## 6. Publicación
+
+* Haz clic en **Publish** para activar los cambios.
+
+## Buenas Prácticas
+
+* Usa `operationId` único.
+* Mantén el schema validado con `Format`.
+* No expongas tu token en repos públicos.
+
+```
+
+---
+
+## 4. Cómo Usar Esta Guía
+
+1. **Copia** la sección "Estructura del Prompt…" y pégala en la conversación con el LLM.  
+2. El LLM devolverá automáticamente la documentación completa en Markdown.  
+3. **Ajusta** los nombres de rutas, esquemas y tokens según tu proyecto concreto.  
+4. **Publica** el GPT y compártelo con tu equipo.
+
+Con este prompt y estructura tendrás siempre a mano una guía para documentar y configurar tus GPTs con Actions de forma rápida y estandarizada.
+
 ## Contribución
 1. Haz un fork del repositorio
 2. Crea una rama para tu función (`git checkout -b feature/MiFuncion`)
