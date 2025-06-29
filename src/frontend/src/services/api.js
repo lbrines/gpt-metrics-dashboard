@@ -7,11 +7,15 @@ import axios from 'axios';
 // URL base del backend
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+// Token de autenticación
+const GPT_API_TOKEN = import.meta.env.VITE_GPT_API_TOKEN || '00e1d8925150c33e169b7d45320bc90b7eb2a2962c1928627dfaac73edf4747c';
+
 // Cliente axios configurado
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
+    ...(GPT_API_TOKEN && { 'Authorization': `Bearer ${GPT_API_TOKEN}` }),
   },
 });
 
@@ -21,10 +25,10 @@ const apiClient = axios.create({
  */
 export const obtenerGPTs = async () => {
   try {
-    // Usar la ruta correcta en el backend
+    // Usar el endpoint específico para métricas que devuelve UUIDs
     const response = await apiClient.get('/metrics/gpts');
     
-    // El backend ya devuelve el formato correcto {id, nombre}
+    // El backend devuelve el formato {id, nombre}
     return response.data;
   } catch (error) {
     console.error('Error al obtener GPTs:', error);

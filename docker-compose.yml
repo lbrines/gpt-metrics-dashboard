@@ -31,7 +31,8 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://admin:adminpassword@postgres:5432/metricas_gpt
-      CORS_ORIGINS: http://localhost:3000
+      GPT_API_TOKEN: ${GPT_API_TOKEN}
+      CORS_ORIGINS: "https://koomtai.com,http://localhost:3000"
     volumes:
       - ./src/backend:/app
     healthcheck:
@@ -48,6 +49,9 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    environment:
+      - VITE_API_URL=/api
+      - VITE_GPT_API_TOKEN=${GPT_API_TOKEN}
     volumes:
       - ./src/frontend:/app
       - /app/node_modules
