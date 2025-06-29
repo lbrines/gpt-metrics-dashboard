@@ -1,0 +1,43 @@
+/* Dashboard de Métricas para GPTs Personalizados */
+/* Autor: Equipo DevOps */
+/* Propósito: Estilos globales para la aplicación */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-gray-800;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+
+  h1 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h2 {
+    @apply text-xl md:text-2xl;
+  }
+}
+
+@layer components {
+  .tarjeta {
+    @apply bg-white rounded-lg shadow-sm p-4 md:p-6;
+  }
+
+  .tarjeta-titulo {
+    @apply text-gray-600 text-sm font-medium mb-2;
+  }
+
+  .tarjeta-valor {
+    @apply text-4xl font-bold;
+  }
+
+  .selector {
+    @apply w-full p-2 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary;
+  }
+}

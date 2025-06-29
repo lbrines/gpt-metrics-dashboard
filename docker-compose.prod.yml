@@ -1,0 +1,183 @@
+version: '3.8'
+
+services:
+  # Backend Service
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+    container_name: dashboard_backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@postgres:5432/${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key}
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    container_name: dashboard_frontend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=/api
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: dashboard_postgres
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    # Security
+    security_opt:
+      - no-new-privileges:true
+
+  # Redis Cache (optional, for future use)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: dashboard_redis
+  #   restart: unless-stopped
+  #   command: redis-server --requirepass ${REDIS_PASSWORD:-your-redis-password}
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - app-network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Traefik Reverse Proxy (alternative to Nginx)
+  # traefik:
+  #   image: traefik:v2.10
+  #   container_name: dashboard_traefik
+  #   restart: unless-stopped
+  #   command:
+  #     - "--api.insecure=true"
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entrypoints.web.address=:80"
+  #     - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+  #     - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+  #     - "--entrypoints.websecure.address=:443"
+  #     - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+  #     - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+  #     - "--certificatesresolvers.myresolver.acme.email=admin@${DOMAIN}"
+  #     - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./traefik/letsencrypt:/letsencrypt
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - backend
+  #     - frontend
+
+# Networks
+networks:
+  app-network:
+    driver: bridge
+    # Enable IPv6 (optional)
+    enable_ipv6: false
+    # Additional network settings
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
+
+# Volumes
+volumes:
+  postgres_data:
+    name: dashboard_postgres_data
+    # Volume labels for better management
+    labels:
+      - "com.dashboard.volume=postgres-data"
+  # redis_data:
+  #   name: dashboard_redis_data
+  #   labels:
+  #     - "com.dashboard.volume=redis-data"
+
+# x-common-variables: &common-variables
+#   TZ: ${TZ:-UTC}
+#   LANG: ${LANG:-en_US.UTF-8}
+#   PYTHONUNBUFFERED: 1
+#   PYTHONFAULTHANDLER: 1
+#   PYTHONHASHSEED: random
+#   PYTHONDONTWRITEBYTECODE: 1
+#   PIP_NO_CACHE_DIR: off
+#   PIP_DISABLE_PIP_VERSION_CHECK: on
+#   PIP_DEFAULT_TIMEOUT: 100
+#   POETRY_VERSION: 1.4.2
+#   POETRY_NO_INTERACTION: 1
+#   POETRY_VIRTUALENVS_CREATE: 'false'
+#   POETRY_CACHE_DIR: /tmp/poetry_cache
+#   WORKON_HOME: /opt/venv
+#   PATH: /opt/venv/bin:$PATH
