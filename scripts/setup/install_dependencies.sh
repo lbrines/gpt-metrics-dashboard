@@ -102,7 +102,7 @@ main() {
     # Add NodeSource repository
     if ! command_exists node; then
         log_message "INFO" "Adding NodeSource repository..."
-        curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - >> "$LOG_FILE" 2>&1
+        bash - >> "$LOG_FILE" 2>&1 < <(curl -fsSL https://deb.nodesource.com/setup_lts.x)
     fi
     
     # Add PostgreSQL repository
@@ -124,10 +124,6 @@ main() {
         libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev \
         # Python development
         python3-pip python3-venv python3-dev python3-setuptools \
-        # Web server
-        nginx \
-        # Certbot for SSL
-        certbot python3-certbot-nginx \
         # Database
         postgresql-15 postgresql-contrib-15 postgresql-client-15 \
         # Monitoring

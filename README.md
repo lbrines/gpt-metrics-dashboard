@@ -44,6 +44,7 @@ gpt-metrics-dashboard/
 ## Requirements
 - Docker and Docker Compose
 - Ubuntu 24.04 (host recommended)
+- **Note:** Nginx runs as a Docker container, no system installation required
 
 ## Installation and Execution
 
@@ -96,13 +97,14 @@ export DB_NAME=dashboard_metrics
 sudo ./scripts/db/setup_db.sh
 ```
 
-#### 2.3 Configure SSL (Production Only)
+#### 2.3 Configure Nginx and SSL (Docker-based)
 ```bash
-# Set your domain
-export DOMAIN=example.com
+# Configure Nginx for Docker container
+./scripts/setup/configure_nginx.sh
 
-# Configure SSL
-sudo ./scripts/ssl/configure_ssl.sh
+# Configure SSL (for production domains)
+export DOMAIN=example.com
+./scripts/ssl/configure_ssl.sh
 ```
 
 #### 2.4 Configure Firewall
@@ -148,6 +150,37 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ### Optional
 - `APP_ENV`: Application environment (development, production, test)
 - `VITE_API_URL`: Frontend API URL (auto-configured based on domain)
+
+## Nginx Configuration (Docker-based)
+
+This project uses Nginx as a Docker container instead of a system installation. The configuration files are located in the `nginx/` directory:
+
+### Configuration Files
+- `nginx/nginx.conf`: Main Nginx configuration
+- `nginx/default.conf`: HTTP server configuration (development)
+- `nginx/ssl.conf`: HTTPS server configuration (production)
+
+### SSL Certificates
+SSL certificates are stored in the `ssl/` directory:
+- `ssl/privkey.pem`: Private key
+- `ssl/fullchain.pem`: Certificate chain
+- `ssl/chain.pem`: Intermediate certificate
+
+### Development vs Production
+- **Development**: Uses `default.conf` with HTTP on port 80
+- **Production**: Uses `ssl.conf` with HTTPS on port 443 and HTTP to HTTPS redirect
+
+### Customizing Nginx Configuration
+To modify the Nginx configuration:
+1. Edit the files in the `nginx/` directory
+2. Restart the Nginx container: `docker compose restart nginx`
+3. The configuration is automatically mounted into the container
+
+### SSL Certificate Management
+For production domains:
+1. Place your SSL certificates in the `ssl/` directory
+2. Update your Docker Compose to mount the SSL directory
+3. Use the `ssl.conf` configuration instead of `default.conf`
 
 ## Available Metrics
 - **Messages per session**: Total "user_message" events ÷ Total sessions
@@ -203,10 +236,10 @@ docker compose logs -f
 docker compose logs -f backend
 docker compose logs -f frontend
 docker compose logs -f postgres
+docker compose logs -f nginx
 
-# View Nginx logs
-sudo tail -f /var/log/nginx/error.log
-sudo tail -f /var/log/nginx/access.log
+# View Nginx logs (Docker container)
+docker compose logs -f nginx
 ```
 
 ### System Maintenance
