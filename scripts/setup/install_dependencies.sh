@@ -207,7 +207,7 @@ main() {
     # Install pyenv
     if [ ! -d "$HOME/.pyenv" ]; then
         log_message "INFO" "Installing pyenv..."
-        curl https://pyenv.run | bash >> "$LOG_FILE" 2>&1
+        bash >> "$LOG_FILE" 2>&1 < <(curl https://pyenv.run)
         
         # Add pyenv to shell configuration
         cat >> ~/.bashrc << 'EOL'
