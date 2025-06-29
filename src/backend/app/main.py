@@ -224,7 +224,7 @@ async def privacy_policy():
     """
     try:
         # Ruta al archivo HTML de la política de privacidad
-        privacy_path = Path(__file__).parent.parent.parent.parent / "privacy" / "privacy.html"
+        privacy_path = Path(__file__).parent.parent / "privacy" / "privacy.html"
         
         if not privacy_path.exists():
             logging.error(f"Archivo de política de privacidad no encontrado: {privacy_path}")
