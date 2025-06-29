@@ -78,13 +78,13 @@ async def verificar_token_gpt(
 
 # Dependencia opcional para endpoints que pueden ser públicos
 async def verificar_token_gpt_opcional(
-    credentials: Optional[HTTPAuthorizationCredentials] = Security(security_scheme, auto_error=False)
+    request: Optional[HTTPAuthorizationCredentials] = None
 ) -> Optional[str]:
     """
     Dependencia opcional que permite acceso sin token pero lo verifica si está presente.
     
     Args:
-        credentials: Credenciales HTTP Bearer opcionales
+        request: Credenciales HTTP Bearer opcionales
         
     Returns:
         Token verificado o None si no se proporciona
@@ -92,11 +92,11 @@ async def verificar_token_gpt_opcional(
     Raises:
         HTTPException: Solo si el token está presente pero es inválido
     """
-    if not credentials:
+    if not request:
         return None
     
     # Si se proporciona token, debe ser válido
-    return await verificar_token_gpt(credentials)
+    return await verificar_token_gpt(request)
 
 def validar_configuracion_token() -> bool:
     """
