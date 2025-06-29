@@ -138,6 +138,38 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 - **API (Backend):** https://tudominio.com/api
 - **Documentación API:** https://tudominio.com/api/docs
 
+## Política de Privacidad
+
+Nuestra Política de Privacidad está disponible en:  
+**https://koomtai.com/privacy**
+
+### Endpoint
+
+La política de privacidad se sirve como una página HTML estática a través de FastAPI:
+
+```bash
+curl -i https://koomtai.com/privacy
+```
+
+### Características
+- **Acceso directo**: Disponible en la ruta `/privacy`
+- **Optimizada para cache**: Cache del navegador de 1 hora para mejor rendimiento
+- **Cabeceras de seguridad**: Incluye `X-Content-Type-Options` y `X-Frame-Options`
+- **Cumplimiento GDPR/CCPA**: Política de privacidad completa siguiendo estándares internacionales
+
+### Estructura de Archivos
+```
+privacy/
+├── privacy.html      # Documento HTML de la política de privacidad
+└── __init__.py       # Inicialización del paquete Python
+```
+
+### Implementación Técnica
+- **Endpoint del backend**: `/privacy` en FastAPI (main.py)
+- **Proxy de Nginx**: Configuración de ruta directa en `nginx/default.conf`
+- **Cabeceras de respuesta**: Optimizadas para seguridad y cache
+- **Manejo de errores**: Registro comprehensivo de errores y códigos de estado HTTP
+
 ## Variables de Entorno
 
 ### Requeridas para Producción

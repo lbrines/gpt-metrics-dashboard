@@ -138,6 +138,38 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 - **API (Backend):** https://your-domain.com/api
 - **API Documentation:** https://your-domain.com/api/docs
 
+## Privacy Policy
+
+Our Privacy Policy is available at:  
+**https://koomtai.com/privacy**
+
+### Endpoint
+
+The privacy policy is served as a static HTML page through FastAPI:
+
+```bash
+curl -i https://koomtai.com/privacy
+```
+
+### Features
+- **Direct access**: Available at `/privacy` route
+- **Cache-optimized**: 1-hour browser cache for better performance
+- **Security headers**: Includes `X-Content-Type-Options` and `X-Frame-Options`
+- **GDPR/CCPA compliant**: Complete privacy policy following international standards
+
+### File Structure
+```
+privacy/
+├── privacy.html      # HTML privacy policy document
+└── __init__.py       # Python package initialization
+```
+
+### Technical Implementation
+- **Backend endpoint**: `/privacy` in FastAPI (main.py)
+- **Nginx proxy**: Direct route configuration in `nginx/default.conf`
+- **Response headers**: Optimized for security and caching
+- **Error handling**: Comprehensive error logging and HTTP status codes
+
 ## Environment Variables
 
 ### Required for Production

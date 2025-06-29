@@ -4,6 +4,7 @@
 
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 import uvicorn
 import json
 import os
@@ -12,6 +13,7 @@ import logging
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import datetime
+from pathlib import Path
 
 from .config import configuracion
 from .database import Base, motor_db, obtener_db
@@ -209,6 +211,39 @@ def crear_sesion_por_codigo(sesion: SesionCreateByCode, token: str = Depends(ver
         raise
     except Exception as e:
         logging.error(f"Error al crear sesión por código: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+@app.get("/privacy", response_class=Response, include_in_schema=False, tags=["Legal"])
+async def privacy_policy():
+    """
+    Devuelve la página de Política de Privacidad.
+    URL pública: https://koomtai.com/privacy
+    
+    Returns:
+        Response: HTML content of the privacy policy with proper headers
+    """
+    try:
+        # Ruta al archivo HTML de la política de privacidad
+        privacy_path = Path(__file__).parent.parent.parent.parent / "privacy" / "privacy.html"
+        
+        if not privacy_path.exists():
+            logging.error(f"Archivo de política de privacidad no encontrado: {privacy_path}")
+            raise HTTPException(status_code=404, detail="Privacy policy not found")
+        
+        content = privacy_path.read_text(encoding="utf-8")
+        
+        return Response(
+            content=content, 
+            media_type="text/html",
+            headers={
+                "Cache-Control": "public, max-age=3600",  # Cache por 1 hora
+                "X-Content-Type-Options": "nosniff",     # Seguridad adicional
+                "X-Frame-Options": "DENY"                # Prevenir embedding
+            }
+        )
+        
+    except Exception as e:
+        logging.error(f"Error al servir política de privacidad: {str(e)}")
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 if __name__ == "__main__":
