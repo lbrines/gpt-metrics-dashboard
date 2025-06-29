@@ -118,8 +118,8 @@ out/
 # Archivos de configuración de Docker
 .dockerignore
 Dockerfile*
-docker-compose*.yml
-!docker-compose.prod.yml
+docker-compose.override.yml
+docker-compose.local.yml
 
 # Archivos de configuración de VS Code
 .vscode/*
