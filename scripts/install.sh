@@ -254,15 +254,27 @@ cd "$PROJECT_ROOT" || error_exit "Failed to change to project root directory"
 
 # Build the Docker images
 log_message "INFO" "Building Docker images..."
-docker compose build || error_exit "Failed to build Docker images"
+if command_exists "docker-compose"; then
+    docker-compose build || error_exit "Failed to build Docker images"
+else
+    docker compose build || error_exit "Failed to build Docker images"
+fi
 
 # Start the services
 if [ "$DOMAIN" != "localhost" ] && [ -f "docker-compose.prod.yml" ]; then
     log_message "INFO" "Starting production services..."
-    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d || error_exit "Failed to start services"
+    if command_exists "docker-compose"; then
+        docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d || error_exit "Failed to start services"
+    else
+        docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d || error_exit "Failed to start services"
+    fi
 else
     log_message "INFO" "Starting development services..."
-    docker compose up -d || error_exit "Failed to start services"
+    if command_exists "docker-compose"; then
+        docker-compose up -d || error_exit "Failed to start services"
+    else
+        docker compose up -d || error_exit "Failed to start services"
+    fi
 fi
 
 # Wait for services to start
@@ -272,7 +284,11 @@ sleep 10
 # Run database migrations if needed
 if [ -f "src/backend/alembic.ini" ]; then
     log_message "INFO" "Running database migrations..."
-    docker compose exec backend alembic upgrade head || log_message "WARNING" "Failed to run database migrations"
+    if command_exists "docker-compose"; then
+        docker-compose exec backend alembic upgrade head || log_message "WARNING" "Failed to run database migrations"
+    else
+        docker compose exec backend alembic upgrade head || log_message "WARNING" "Failed to run database migrations"
+    fi
 fi
 
 # Run tests
