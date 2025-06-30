@@ -7,8 +7,8 @@ import axios from 'axios';
 // URL base del backend
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-// Token de autenticación
-const GPT_API_TOKEN = import.meta.env.VITE_GPT_API_TOKEN || '00e1d8925150c33e169b7d45320bc90b7eb2a2962c1928627dfaac73edf4747c';
+// Token de autenticación (debe configurarse en variables de entorno)
+const GPT_API_TOKEN = import.meta.env.VITE_GPT_API_TOKEN || '';
 
 // Cliente axios configurado
 const apiClient = axios.create({
