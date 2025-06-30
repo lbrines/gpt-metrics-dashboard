@@ -94,18 +94,12 @@ def obtener_gpts_config():
         # Verificar si el directorio existe, si no, crearlo
         if not os.path.exists(config_dir):
             os.makedirs(config_dir)
-            logging.warning(f"El directorio de configuración no existía y ha sido creado: {config_dir}")
+            logging.info(f"El directorio de configuración ha sido creado: {config_dir}")
         
         # Verificar si el archivo existe
         if not os.path.exists(json_path):
-            # Crear un archivo de ejemplo si no existe
-            ejemplo_gpts = [
-                {"code": "dummy-advisor", "name": "Dummy Advisor GPT"},
-                {"code": "cannabis-advisor", "name": "Cannabis Cultivation Advisor"}
-            ]
-            with open(json_path, 'w') as f:
-                json.dump(ejemplo_gpts, f, indent=2)
-            logging.warning(f"El archivo de configuración no existía y ha sido creado con datos de ejemplo: {json_path}")
+            logging.info(f"El archivo de configuración no existe: {json_path}. Devolviendo lista vacía.")
+            return []
         
         # Leer el archivo JSON
         with open(json_path, 'r') as f:
