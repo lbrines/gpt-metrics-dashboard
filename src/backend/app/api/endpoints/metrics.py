@@ -2,7 +2,7 @@
 # Autor: Equipo DevOps
 # Propósito: Endpoint para consultar métricas de GPTs
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID
@@ -78,4 +78,8 @@ def obtener_gpts(db: Session = Depends(obtener_db)):
     """
     from ...models.metricas import GPT
     gpts = db.query(GPT.id, GPT.nombre).all()
-    return [{"id": str(id), "nombre": nombre} for id, nombre in gpts]
+    return Response(
+        content=str([{"id": str(id), "nombre": nombre} for id, nombre in gpts]),
+        media_type="application/json",
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate"}
+    )
